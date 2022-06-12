@@ -11,7 +11,7 @@ import seaborn as sns
 
 
 
-### Step 2 : Run Shannon Entropy code
+# Run Shannon Entropy code
 def shannon_entropy_by_lab(df):
     """
     Calculates the shannon entropy for a lab over time
@@ -62,16 +62,9 @@ def shannon_entropy_by_lab(df):
 
 
 
-    ### Step 3 : Exploratory Analysis
-
-    ### Step 4 : Analyze the patterns
-
-    ### Step 5 : Adjudicate if SE will/can be used as a feature in predictive modelling
-
 
 if __name__ == '__main__':
-    ### Step 1: load & filter data
-    # Load the labs data
+    # load & filter labs data
     data_dictionary_file = r'meta\var_dictionary_updated_2022.1.19_BW_4.xlsx'
     xl = pd.ExcelFile(data_dictionary_file)
     data_dir = r'\\prometheus.neuro.columbia.edu\NeurocriticalCare\data\Projects\32_COVID_Archetype_data\labs_btwn_vis\\'
@@ -82,7 +75,6 @@ if __name__ == '__main__':
     pat_vis = 'raw_vis.csv'
     pat_cov_data = pd.read_csv(data_dir2 + pat_cov, low_memory=False)
     pat_vis_data = pd.read_csv(data_dir2 + pat_vis, low_memory=False)
-
 
     # Filter the cov patient data
     pat_vis_data = pat_vis_data[['PAT_ID', 'DEPARTMENT_NAME', 'HOSP_ADMSN_TIME', 'INP_ADM_DATE', 'HOSP_DISCH_TIME']]
@@ -104,9 +96,9 @@ if __name__ == '__main__':
     data_to_cluster = pd.DataFrame([])
 
     df = pd.DataFrame([])
-
     pd_se_lab_all = pd.DataFrame([])
     lab_names_ytick = []
+
     #for sname in test_data:
     for sname in xl.sheet_names:
         if 'Notes' in sname:
@@ -162,7 +154,7 @@ if __name__ == '__main__':
             continue
         lab_cov_pos.loc[lab_cov_pos['ORD_NUM_VALUE'] > 9999, 'ORD_NUM_VALUE'] = np.nan
 
-        # Anchor day
+        # Anchor day: length of stay (LOS)
         day1 = pd.to_datetime(lab_cov_pos['HOSP_ADMSN_TIME']).dt.date
         day2 = pd.to_datetime(lab_cov_pos['ordering_date']).dt.date
         anchor_day = day2 - day1
