@@ -25,10 +25,8 @@ def shannon_entropy_by_lab(df):
     lab_name = df['NAME'].unique()[0]
     lab_name = lab_name[:-6]
 
-    test3 = list(names.groups)
     # get groups for each anchor day
     anchor_days = df.groupby("anchor_day")
-    TEST3 = list(anchor_days.groups)
     for k in range(len(names)):
         name = names.get_group((list(names.groups)[k]))
         anchor_days = name.groupby("anchor_day")
@@ -39,8 +37,6 @@ def shannon_entropy_by_lab(df):
         # loop through each anchor day
         for i in range(len(anchor_days)):
             # grab day we are analyzing
-            TEST1 = list(anchor_days.groups)
-            TEST = list(anchor_days.groups)[i]
             day = anchor_days.get_group((list(anchor_days.groups)[i]))
             # get counts for the anchor day when the labs were ordered
             values_day = day.anchor_day.value_counts()
@@ -59,17 +55,10 @@ def shannon_entropy_by_lab(df):
                 total_entropy.append(entropy)
         # get unique list for days
         days = np.unique(df.anchor_day).reshape(len(np.unique(df.anchor_day)), 1)
-        # length_days = len(days)
-        # name_list = np.full(shape=length_days, fill_value=name['NAME'][1]).reshape(185, 1)
-        # graph_data = pd.DataFrame(list(zip(days, name_list)), columns=['Date', 'Lab'])
-        # plt.imshow(days.astype('float').T)
-        test = 0
 
-    # create a result df. This will contain two columns. Date and shannon entropy for that day
+        # create a result df. This will contain two columns. Date and shannon entropy for that day
         results_df = pd.DataFrame(list(zip(days.ravel(), total_entropy)), columns=['Anchor_days', lab_name])
         return results_df
-
-
 
 
 
@@ -85,7 +74,6 @@ if __name__ == '__main__':
     # Load the labs data
     data_dictionary_file = r'meta\var_dictionary_updated_2022.1.19_BW_4.xlsx'
     xl = pd.ExcelFile(data_dictionary_file)
-
     data_dir = r'\\prometheus.neuro.columbia.edu\NeurocriticalCare\data\Projects\32_COVID_Archetype_data\labs_btwn_vis\\'
 
    # Load covid positive patient data
@@ -104,12 +92,9 @@ if __name__ == '__main__':
 
     # Merge cov patient data with lab data
     pat_cov_pos_vis = pd.merge(pat_vis_data, pat_cov_data, how='inner', on='PAT_ID')
-    #pat_cov_pos_vis = pd.to_datetime(pat_cov_pos_vis, errrors='ignore')
-
     pat_cov_pos_vis = pat_cov_pos_vis[(pat_cov_pos_vis['RESULT_TIME'] >= pat_cov_pos_vis['INP_ADM_DATE']) & (pat_cov_pos_vis['RESULT_TIME'] <= pat_cov_pos_vis['HOSP_DISCH_TIME'])]
     pat_cov_pos_vis.sort_values('RESULT_TIME', inplace=True)
     pat_unique_visits = pat_cov_pos_vis.groupby(['PAT_ID']).first().reset_index()
-    #df = pd.merge(pat_cov_pos_vis, df, how='left', on='PAT_ID')
 
     # Filter data included in var_dictionary file
     notes_data_dictionary = pd.read_excel(data_dictionary_file, sheet_name='Notes')
@@ -120,14 +105,8 @@ if __name__ == '__main__':
 
     df = pd.DataFrame([])
 
-    #test individual data
-    test_data = []
-    test_data.append(xl.sheet_names[75])
-    test_data.append(xl.sheet_names[76])
-    test_data.append(xl.sheet_names[77])
     pd_se_lab_all = pd.DataFrame([])
-
-    lab_names_ytick =[]
+    lab_names_ytick = []
     #for sname in test_data:
     for sname in xl.sheet_names:
         if 'Notes' in sname:
@@ -167,7 +146,6 @@ if __name__ == '__main__':
         # filter data if it is in pat_cov_pos_vis
         pat_unique_visits = pat_unique_visits[['PAT_ID', 'INP_ADM_DATE']]
 
-        #pat_unique_visits = pat_unique_visits.drop(['RESULT_TIME', 'HOSP_ADMSN_TIME'], axis=1)
         lab_cov_pos = pd.merge(lab_data_filt, pat_unique_visits, how='inner', on='PAT_ID')
         try:
             if varname == 'totalProtein' :
@@ -194,28 +172,20 @@ if __name__ == '__main__':
 
         # Merge dataset with anchor day
         lab_cov_pos['anchor_day'] = anchor_day
-        # df = pd.concat([lab_cov_pos[lab_cov_pos['anchor_day'] != -1], df], axis=0)
         df = lab_cov_pos[lab_cov_pos['anchor_day'] > -1]
         se_lab = shannon_entropy_by_lab(df)
         se_lab = se_lab.set_index('Anchor_days')
-        # se_lab['Lab_name']= df['NAME'].unique()[0]
-        # pd_se_lab_all = se_lab  # test
         if len(pd_se_lab_all) == 0:
             pd_se_lab_all = se_lab
-            # pd_se_lab_all = pd_se_lab_all.set_index('Anchor_days')
         else:
             pd_se_lab_all = pd_se_lab_all.join(se_lab, on=['Anchor_days'], how='left', lsuffix='left', rsuffix='right')
-            # pd_se_lab_all = pd_se_lab_all.join(se_lab, on=['Anchor_days'])
         lab_names_ytick.append(sname)
-        # pd_se_lab_all = pd.join([pd_se_lab_all, se_lab], on='Anchor_days')
-    # print("total data finishes")
 
-    # plot heatmap
+    # Plot entropy heatmap
     pd_se_lab_all = pd_se_lab_all.reset_index()
     ax = plt.gca()
     data_to_plot = pd_se_lab_all.loc[:, pd_se_lab_all.columns[3:]]
     fig = ax.imshow(data_to_plot.to_numpy().astype('float').T, aspect=5.8)  # delete the first row
-    # plt.yticks([0,1],['WHITE BLOOD CELL {NYP}_SE', 'PROTEIN TOTAL {NYP}_SE'])
     ax.set_yticks(np.arange(0, len(data_to_plot.columns)), data_to_plot.columns)  # delete the first 2 columns
     plt.show()
     plt.colorbar(fig, ax=ax)
