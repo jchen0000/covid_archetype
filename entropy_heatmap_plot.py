@@ -154,7 +154,7 @@ if __name__ == '__main__':
             continue
         lab_cov_pos.loc[lab_cov_pos['ORD_NUM_VALUE'] > 9999, 'ORD_NUM_VALUE'] = np.nan
 
-        # Anchor day: length of stay (LOS)
+        # Anchor day
         day1 = pd.to_datetime(lab_cov_pos['HOSP_ADMSN_TIME']).dt.date
         day2 = pd.to_datetime(lab_cov_pos['ordering_date']).dt.date
         anchor_day = day2 - day1
