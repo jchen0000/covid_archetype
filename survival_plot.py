@@ -210,7 +210,7 @@ if __name__ == '__main__':
     count_los = count_los.reset_index()
     count_los.columns = ['los', 'patients_count']
     total = count_los['patients_count'].iat[0]
-    percentage = count_los['patients_count']/total
+    percentage = count_los['patients_count']/total  # x = 2.6, 2 = 0.802
     count_los['percentage'] = percentage
     count_los.plot.line(x='los', y='percentage')
-
+    # conclusion: discard patients after anchor day 3
