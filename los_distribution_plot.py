@@ -1,4 +1,4 @@
-import shannon_entropy_by_lab
+# import shannon_entropy_by_lab
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -113,6 +113,26 @@ if __name__ == '__main__':
         if 'Notes' in sname:
             print(sname)
             continue
+        # all los in alt are greater than 5
+        if 'alt'in sname:
+            print(sname)
+            continue
+        # all los in ast are greater than 5
+        if 'ast' in sname:
+            print(sname)
+            continue
+        # all los in bun are greater than 5
+        if 'bun' in sname:
+            print(sname)
+            continue
+        # all los in co2 are greater than 5
+        if 'co2' in sname:
+            print(sname)
+            continue
+        # all los in glucan are greater than 5
+        if 'glucan' in sname:
+            print(sname)
+            continue
         # missing admn time & discharge time
         if 'total protein' in sname:
             print(sname)
@@ -171,8 +191,8 @@ if __name__ == '__main__':
         anchor_day = anchor_day.astype(int) # converts to integers
 
         # length of stay (LOS)
-        day3 = pd.to_datetime(lab_cov_pos['HOSP_ADMSN_TIME']).dt.date
-        los = day2 - day3
+        day3 = pd.to_datetime(lab_cov_pos['HOSP_DISCH_TIME']).dt.date
+        los = day3 - day1
         los = los/(pd.offsets.Day(1))
         los = los.fillna(-1)  # converts nans to -1
         los = los.astype(int)
@@ -180,9 +200,10 @@ if __name__ == '__main__':
         # Merge dataset with anchor day & LOS
         lab_cov_pos['anchor_day'] = anchor_day
         df = lab_cov_pos[lab_cov_pos['anchor_day'] > 1]  # drop nans
+
         lab_cov_pos['los'] = los
         df = lab_cov_pos[lab_cov_pos['los'] > 1]  # drop LOS less than 1
-
+        df = df[df['los'] < 5]  # drop LOS greater than 4
         # Shannon entropy group by labs
         se_lab = shannon_entropy_by_lab(df)
         se_lab = se_lab.set_index('Anchor_days')
@@ -193,15 +214,6 @@ if __name__ == '__main__':
             pd_se_lab_all = pd_se_lab_all.join(se_lab, on=['Anchor_days'], how='left', lsuffix='left', rsuffix='right')
         lab_names_ytick.append(sname)
 
-    # Plot entropy heatmap
-    pd_se_lab_all = pd_se_lab_all.reset_index()
-    ax = plt.gca()
-    data_to_plot = pd_se_lab_all.loc[:, pd_se_lab_all.columns[3:]]
-    fig = ax.imshow(data_to_plot.to_numpy().astype('float').T, aspect=5.8)  # delete the first row
-    ax.set_yticks(np.arange(0, len(data_to_plot.columns)), data_to_plot.columns)  # delete the first 2 columns
-    plt.show()
-    plt.colorbar(fig, ax=ax)
-
 
     # LOS distribution plot
     unique_df = df.drop_duplicates(subset=['IDENTITY_ID'])
@@ -210,7 +222,7 @@ if __name__ == '__main__':
     count_los = count_los.reset_index()
     count_los.columns = ['los', 'patients_count']
     total = count_los['patients_count'].iat[0]
-    percentage = count_los['patients_count']/total  # x = 2.6, y = 0.802
+    percentage = count_los['patients_count']/total  # x = 4.2, y = 0.8
     count_los['percentage'] = percentage
     count_los.plot.line(x='los', y='percentage')
-    # conclusion: discard patients after anchor day 3
+    # conclusion: discard patients after anchor day 4
